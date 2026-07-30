@@ -113,10 +113,17 @@ PRODUCT_PATH="$ASSETS_DIR/$PRODUCT_IMAGE_NAME"
 PROMPT="$(<"$PROMPT_FILE")"
 mkdir -p "$OUTPUT_DIR" "$STATE_DIR"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-RUN_DIR="$OUTPUT_DIR/${AVATAR_NAME}_${STAMP}"
+# Avoid spaces in paths (CLI @file args + shell redirects break easily).
+RUN_SLUG="$(echo "$AVATAR_NAME" | tr -cs 'A-Za-z0-9._-' '_' | sed 's/^_//;s/_$//')"
+RUN_DIR="$OUTPUT_DIR/${RUN_SLUG}_${STAMP}"
 mkdir -p "$RUN_DIR"
 
+ensure_run_dir() {
+  mkdir -p "$RUN_DIR"
+}
+
 echo "==> Auth OK"
+echo "==> Run dir: $RUN_DIR"
 echo "==> Avatar image:  reference_assets/$IMAGE_NAME"
 echo "==> Product image: reference_assets/$PRODUCT_IMAGE_NAME"
 echo "==> Mode: $MODE | ${DURATION}s | $ASPECT_RATIO | $RESOLUTION"
@@ -124,6 +131,7 @@ echo "==> Mode: $MODE | ${DURATION}s | $ASPECT_RATIO | $RESOLUTION"
 upload_file() {
   local path="$1"
   local out
+  ensure_run_dir
   out="$(higgsfield upload create "$path" --json)"
   echo "$out" >"$RUN_DIR/upload_$(basename "$path").json"
   local id url
@@ -156,6 +164,7 @@ if [[ -z "$AVATAR_ID" ]]; then
   echo "    upload url: $AVATAR_UPLOAD_URL"
 
   echo "==> Creating Marketing Studio avatar '$AVATAR_NAME'..."
+  ensure_run_dir
   AVATAR_JSON="$(higgsfield marketing-studio avatars create \
     --name "$AVATAR_NAME" \
     --image "$AVATAR_UPLOAD_ID" \
@@ -174,6 +183,7 @@ if [[ -z "$PRODUCT_ID" ]]; then
   echo "    upload id: $PRODUCT_UPLOAD_ID"
 
   echo "==> Creating Marketing Studio product..."
+  ensure_run_dir
   PRODUCT_JSON="$(higgsfield marketing-studio products create \
     --title "Seamless Wireless Top" \
     --description "Soft seamless everyday support top for UGC ecommerce ads" \
@@ -187,11 +197,13 @@ else
   echo "==> Reusing product id: $PRODUCT_ID"
 fi
 
+ensure_run_dir
 printf '[{"id":"%s","type":"custom"}]\n' "$AVATAR_ID" >"$RUN_DIR/avatars.json"
 printf '["%s"]\n' "$PRODUCT_ID" >"$RUN_DIR/product_ids.json"
 printf '%s\n' "$PROMPT" >"$RUN_DIR/prompt.txt"
 
 echo "==> Generating marketing_studio_video (this can take several minutes)..."
+set +e
 GEN_JSON="$(higgsfield generate create marketing_studio_video \
   --prompt "$PROMPT" \
   --avatars @"$RUN_DIR/avatars.json" \
@@ -202,9 +214,13 @@ GEN_JSON="$(higgsfield generate create marketing_studio_video \
   --aspect_ratio "$ASPECT_RATIO" \
   --wait \
   --wait-timeout 30m \
-  --json)" || die "Video generation failed"
+  --json)"
+GEN_RC=$?
+set -e
 
-echo "$GEN_JSON" >"$RUN_DIR/generate.json"
+ensure_run_dir
+printf '%s\n' "$GEN_JSON" >"$RUN_DIR/generate.json"
+[[ $GEN_RC -eq 0 ]] || die "Video generation failed (exit $GEN_RC). See $RUN_DIR/generate.json"
 
 VIDEO_URL="$(echo "$GEN_JSON" | jq -r '
   .. | objects
