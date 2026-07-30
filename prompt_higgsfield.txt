@@ -1,0 +1,14 @@
+Create a realistic UGC-style talking-head product testimonial ad for social (TikTok / Reels).
+
+Presenter: the custom avatar (same person as the uploaded face reference).
+She holds up the white seamless wireless top / support garment toward the camera and speaks enthusiastically to camera like recommending it to a friend.
+
+Spoken angle (English, conversational, native on-camera speech + lip sync):
+"Okay wait — this seamless top? Game changer. Soft, no digging, zero weird lines under clothes. I literally wear it every day now."
+
+Keep it premium UGC:
+- smartphone handheld feel, medium close-up, vertical 9:16
+- soft natural indoor light, clean background
+- natural blinks, nods, subtle hand gestures
+- preserve face identity and keep the held product as one solid object (no duplication / morphing)
+- tasteful ecommerce fashion ad, no logos or on-screen text overlays

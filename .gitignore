@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+output/
+.higgsfield_state/
+.higgsfield_credentials.json
+.DS_Store
