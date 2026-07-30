@@ -1,5 +1,8 @@
 # poc-higgsfield
 
+<img width="1274" height="787" alt="image" src="https://github.com/user-attachments/assets/2a99ca18-1ffa-4f4c-ae20-16feacd50206" />
+
+
 PoC CLI for **Higgsfield Marketing Studio**: create a custom avatar from a local image, register a product, and generate a UGC-style video — with headless auth suitable for automation.
 
 ## What this does
