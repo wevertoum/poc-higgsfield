@@ -137,6 +137,24 @@ Each run creates a folder under `output/higgsfield/<name>_<timestamp>/` with:
 
 Edit `prompt_higgsfield.txt` for dialogue, motion, and product language. Marketing Studio generates the creative from this brief + avatar + product context.
 
+## HTTP bridge service (AWS-ready)
+
+See [`service/README.md`](service/README.md).
+
+FastAPI service that refreshes OAuth credentials daily and exposes:
+
+- `GET /avatars`
+- `GET /products`
+- `POST /auth/refresh`
+- `GET /account`
+
+```bash
+pip install -r service/requirements.txt
+uvicorn service.app:app --port 8080
+```
+
+Designed for ECS/Fargate + Secrets Manager (store `credentials.json`, refresh daily, alert when refresh_token dies).
+
 ## Security notes
 
 - **Never commit** `.env`, `.higgsfield_credentials.json`, or `~/.config/higgsfield/credentials.json`
